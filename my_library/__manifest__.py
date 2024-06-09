@@ -13,10 +13,11 @@
 
     'views/library_book.xml',
     'views/library_book_categ.xml',
-    
+
+    'data/data.xml',
   ],
   'demo': [
-    'demo.xml',
+    'data/demo.xml',
   ],
   'sequence': -97,
   'application': True,

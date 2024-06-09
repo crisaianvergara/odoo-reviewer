@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="res_partner_packt" model="res.partner">
+        <field name="name">Packt Publishing</field>
+        <field name="city">Birmingham</field>
+        <field name="country_id" ref="base.uk" />
+    </record>
+
+    <record id="book_category_all" model="library.book.category" forcecreate="False">
+        <field name="name">All books</field>
+    </record>
+
+    <record id="book_category_to_delete" model="library.book.category">
+        <field name="name">Test Category</field>
+    </record>
+    <record id="book_category_not_delete" model="library.book.category">
+        <field name="name">Test Category 2</field>
+    </record>
+
+    <delete model="library.book.category" id="book_category_to_delete" />
+    <delete model="library.book.category" search="[('name', 'ilike', 'Test')]" />
+
+    <function model="library.book" name="_update_book_price" />
+</odoo>

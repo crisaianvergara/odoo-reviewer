@@ -345,6 +345,14 @@ class LibraryBook(models.Model):
 
     return [("date_release", new_op, value_date)]
 
+  @api.constrains("date_release")
+  def _check_release_date(self):
+    _logger.info("----- Function: _check_release_date -----")
+
+    for record in self:
+      if record.date_release and record.date_release > fields.Date.today():
+        raise models.ValidationError("release date must be in the past")
+
   # def name_get(self):
   #   _logger.info("----- Function: name_get -----")
 
@@ -366,15 +374,60 @@ class LibraryBook(models.Model):
       name = "%s (%s)" % (book.name, ", " .join(authors))
       result.append((book.id, name))
 
-      return result
+    return result
 
-  @api.constrains("date_release")
-  def _check_release_date(self):
-    _logger.info("----- Function: _check_release_date -----")
+  @api.model
+  def _name_search(self, name="", args=None, operator="ilike", limit=100, name_get_uid=None):
+    _logger.info("----- Function: _name_search -----")
 
-    for record in self:
-      if record.date_release and record.date_release > fields.Date.today():
-        raise models.ValidationError("release date must be in the past")
+    args = [] if args is None else args.copy()
+    
+    if not (name == "" and operator == "ilike"):
+      args += [
+        "|", "|",
+        ("name", operator, name),
+        ("isbn", operator, name),
+        ("author_ids.name", operator, name)
+      ]
+
+    return super(LibraryBook, self)._name_search(
+      name=name, args=args,
+      operator=operator,
+      limit=limit,
+      name_get_uid=name_get_uid,
+    )
+
+  # Fetching data in groups using read_group()
+  def grouped_data(self):
+    _logger.info("----- Function: grouped_data -----")
+
+    data = self._get_average_cost()
+
+    _logger.info(f"----- Data: {data} -----")
+
+  @api.model
+  def _get_average_cost(self):
+    _logger.info("----- Function: _get_average_cost -----")
+
+    grouped_result = self.read_group(
+      [('cost_price', '!=', False)], # Domain
+      ['category_id', 'cost_price:avg'], # Fields to access
+      ['category_id'] # group_by
+    )
+
+    _logger.info(f"----- Grouped Result: {grouped_result} -----")
+
+    return grouped_result
+
+  # Invoking functions from XML files
+  @api.model
+  def _update_book_price(self):
+    _logger.info("----- Function: _update_book_price -----")
+
+    all_books = self.search([])
+
+    for book in all_books:
+      book.cost_price += 10
 
 
 class ResPartner(models.Model):
