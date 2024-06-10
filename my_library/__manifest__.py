@@ -13,6 +13,7 @@
 
     'views/library_book.xml',
     'views/library_book_categ.xml',
+    'views/library_book_rent.xml',
 
     'data/data.xml',
   ],

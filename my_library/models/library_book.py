@@ -1,10 +1,10 @@
 from datetime import timedelta
+import logging
 
 from odoo import api, models, fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.translate import _
 
-import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -289,6 +289,20 @@ class LibraryBook(models.Model):
 
     self.change_state("lost")
 
+  def book_rent(self):
+    _logger.info("----- Function: book_rent -----")
+
+    self.ensure_one()
+
+    if self.state != 'available':
+      raise UserError(_('Book is not available for renting'))
+    
+    rent_as_superuser = self.env['library.book.rent'].sudo()
+    rent_as_superuser.create({
+      'book_id': self.id,
+      'borrower_id': self.env.user.partner_id.id,
+    })
+
   @api.model
   def _referencable_models(self):
     _logger.info("----- Function: _referencable_models -----")
@@ -471,6 +485,7 @@ class LibraryMember(models.Model):
     "res.partner",
     ondelete="cascade",
     delegate=True, # Delegation second method
+    required=True,
   )
   date_start = fields.Date("Member Since")
   date_end = fields.Date("Termination Date")
