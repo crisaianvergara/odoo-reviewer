@@ -30,6 +30,8 @@
           <button name="mapped_books" string="Mapped Authors" type="object" />
           <button name="sort_books" string="Sort Books" type="object" />
           <button name="grouped_data" string="Groupped Data" type="object" />
+          <button name="book_rent" string="Rent this Book" type="object" class="btn-primary" />
+          <button name="average_book_occupation" string="Log Average Occ." type="object" />
           <field name="state" widget="statusbar" />
         </header>
         <sheet>

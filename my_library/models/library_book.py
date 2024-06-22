@@ -287,7 +287,13 @@ class LibraryBook(models.Model):
   def make_lost(self):
     _logger.info("----- Function: make_lost -----")
 
-    self.change_state("lost")
+    # self.change_state("lost")
+
+    self.ensure_one()
+    self.state = 'lost'
+
+    if not self.env.context.get('avoid_deactivate'):
+      self.active = False
 
   def book_rent(self):
     _logger.info("----- Function: book_rent -----")
@@ -443,6 +449,24 @@ class LibraryBook(models.Model):
     for book in all_books:
       book.cost_price += 10
 
+  def average_book_occupation(self):
+    _logger.info("----- Function: average_book_occupation -----")
+
+    self.flush()
+    sql_query = """
+      SELECT
+        lb.name,
+        avg((EXTRACT(epoch from age(return_date, rent_date)) / 86400))::int
+      FROM
+        library_book_rent AS lbr
+      JOIN
+        library_book as lb ON lb.id = lbr.book_id
+      WHERE lbr.state = 'returned'
+      GROUP BY lb.name; 
+    """
+    self.env.cr.execute(sql_query)
+    result = self.env.cr.fetchall()
+    _logger.info(f'Average book occupation: {result}')
 
 class ResPartner(models.Model):
   _inherit = "res.partner"

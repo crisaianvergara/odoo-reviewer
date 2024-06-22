@@ -15,6 +15,7 @@ class LibraryBookRent(models.Model):
     [
       ('ongoing', 'Ongoing'),
       ('returned', 'Returned'),
+      ('lost', 'Lost'),
     ],
     'State',
     default='ongoing',
@@ -41,6 +42,14 @@ class LibraryBookRent(models.Model):
       'state': 'returned',
       'return_date': fields.Date.today(),
     })
+
+  def book_lost(self):
+    _logger.info("----- Function: book_lost -----")
+    
+    self.ensure_one()
+    self.sudo().state = 'lost'
+    book_with_different_context = self.book_id.with_context(avoid_deactivate=True)
+    book_with_different_context.sudo().make_lost()
 
 
 
